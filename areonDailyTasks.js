@@ -5,12 +5,15 @@ const FormData = require("form-data");
 const path = require("path");
 const { HttpsProxyAgent } = require("https-proxy-agent");
 const dotenv = require("dotenv");
+const notify = require("./sendNotify");
 dotenv.config();
-const proxyList = process.env.proxyList.split(",").map((item) => item.trim());
-const proxyApi = process.env.proxyApi;
-const threadNum = Number(process.env.threadNum);
-const totalNum = Number(process.env.totalNum);
-const retryNum = Number(process.env.retryNum);
+const proxyList = process.env.proxyList
+  ? process.env.proxyList.split(",").map((item) => item.trim())
+  : [];
+const proxyApi = process.env.proxyApi ? process.env.proxyApi : "";
+const threadNum = process.env.threadNum ? Number(process.env.threadNum) : 5;
+const totalNum = process.env.totalNum ? Number(process.env.totalNum) : 10;
+const retryNum = process.env.retryNum ? Number(process.env.retryNum) : 30;
 
 const mintNftContractAddressList = [
   "0x27534E8f165262d7C50eeDFFae0c8E7eD1Dd2695",
@@ -28,7 +31,9 @@ const mintNftContractAddressList = [
 let ipList = [];
 let addresses = [];
 let picFiles;
-
+let sendMsg = "";
+let successNum = 0;
+let failNum = 0;
 async function getIpFromList() {
   // 检测 proxyApi 和 proxyList 是否配置正确
   let proxy = "";
@@ -796,7 +801,9 @@ async function mainDo() {
           );
           throw new Error(error);
         }
+
         saveSuccessfulAddress(walletInfo);
+        successNum++;
         success = true;
       } catch (error) {
         retryCount++;
@@ -807,6 +814,7 @@ async function mainDo() {
       }
     }
     if (!success) {
+      failNum++;
       throw new Error("任务执行失败");
     }
   };
@@ -835,9 +843,14 @@ async function main() {
     } else {
       await mainDo();
     }
-    console.log("任务执行完毕");
+
+    sendMsg = `任务执行完毕\n账号总数:${addresses.length}\n成功数量:${successNum}\n失败数量:${failNum}`;
+    await notify.sendNotify(`areonDailyTasks`, sendMsg);
+    console.log("任务执行完毕", sendMsg);
   } catch (error) {
-    console.log("任务执行失败", error);
+    sendMsg = `任务执行失败\n账号总数:${addresses.length}\n成功数量:${successNum}\n失败数量:${failNum}\n失败原因:${error.message}`;
+    await notify.sendNotify(`areonDailyTasks`, sendMsg);
+    console.log("任务执行失败", sendMsg);
   }
 }
 main();
