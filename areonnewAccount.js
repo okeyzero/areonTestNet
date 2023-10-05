@@ -1,10 +1,11 @@
-import { ethers } from "ethers";
-import Axios from "axios";
-import fs from "fs";
-import FormData from "form-data";
-import path from "path";
-import { HttpsProxyAgent } from "https-proxy-agent";
-import dotenv from "dotenv";
+const ethers = require("ethers");
+const Axios = require("axios");
+const fs = require("fs");
+const FormData = require("form-data");
+const path = require("path");
+const { HttpsProxyAgent } = require("https-proxy-agent");
+const dotenv = require("dotenv");
+
 dotenv.config();
 const proxyList = process.env.proxyList.split(",").map((item) => item.trim());
 const proxyApi = process.env.proxyApi;
@@ -53,7 +54,7 @@ async function getIPListFromAPI() {
     //去除ip 的换行符空格等
 
     ips = ips
-      .split("\r\n")
+      .split("\n")
       .filter((ip) => ip.trim() !== "")
       .map((ip) => "http://" + ip.trim());
 
@@ -817,14 +818,17 @@ async function mainDo() {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
 }
-
-try {
-  if (proxyList.length == 0 && isNullOrUndefinedOrEmpty(proxyApi)) {
-    throw new Error("代理列表为空");
-  } else {
-    await mainDo();
+async function main() {
+  try {
+    await getIpFromList();
+    if (proxyList.length == 0 && isNullOrUndefinedOrEmpty(proxyApi)) {
+      throw new Error("代理列表为空");
+    } else {
+      await mainDo();
+    }
+    console.log("任务执行完毕");
+  } catch (error) {
+    console.log("任务执行失败", error);
   }
-  console.log("任务执行完毕");
-} catch (error) {
-  console.log("任务执行失败", error);
 }
+main();
