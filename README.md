@@ -39,4 +39,22 @@ ethers@5.7.2
 path
 ```
 
-设置任务
+添加订阅
+
+```
+名称：areonTestNet
+公开仓库 https://github.com/okeyzero/areonTestNet.git
+定时规则 2 2 28 * *
+白名单 areonDailyTasks.js|areonnewAccount.js
+点确定 保存 运行一下
+```
+
+因为要创建 nft 需要上传图片 所以 在脚本管理 okeyzero_areonTestNet/pic 文件夹下 手动复制 随机上传得 图片（建议多找一些 不同类型得）如果图片较多 可以 上传压缩包 自己进入 shell 去解压
+
+![Alt text](image.png)
+因为我 ethers (5.7.2) 版本 是在 shell 安装的 所以 这里没显示
+![Alt text](image-1.png)
+![Alt text](image-2.png)
+![Alt text](image-3.png)![Alt text](image-4.png)
+![Alt text](image-6.png)
+![Alt text](image-5.png)
